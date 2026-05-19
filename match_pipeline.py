@@ -23,7 +23,7 @@ def load_model(trained_model_path, device_ids, pre_trained=False):
 
     if Path(trained_model_path).exists():
         print(f"Loading model from {trained_model_path}...")
-        pre_trained_state = torch.load(str(trained_model_path), map_location='cuda:{}'.format(device_ids[0]))
+        pre_trained_state = torch.load(str(trained_model_path), map_location='cuda:{}'.format(device_ids[0]), weights_only=False)
         model_state = model.state_dict()
         trained_model_state = {k: v for k, v in pre_trained_state["model"].items() if k in model_state}
         model_state.update(trained_model_state)

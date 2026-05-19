@@ -3,7 +3,6 @@ import cv2
 import pickle
 from multiprocessing import Process, Queue
 from torch.utils.data import Dataset
-from albumentations.pytorch.functional import img_to_tensor
 import torch
 from pathlib import Path
 import os
@@ -161,12 +160,12 @@ class MixDataset(Dataset):
 
         import albumentations as alb
         self.aug_list = [
-            alb.OneOf([alb.RandomBrightness(limit=0.2, p=0.8), alb.RandomContrast(limit=0.3, p=0.8)], p=0.5),
+            alb.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.3, p=0.5),
             alb.OneOf([alb.MotionBlur(p=0.8), alb.GaussNoise(p=0.8)], p=0.8),
             ]
         self.aug_func = alb.Compose(self.aug_list, p=1)
         self.aug_list0 = [
-            alb.ElasticTransform(p=1, alpha=1, sigma=60, alpha_affine=10),
+            alb.ElasticTransform(p=1, alpha=1, sigma=60),
             ]
         self.aug_func0 = alb.Compose(self.aug_list0, p=1)
 
@@ -731,7 +730,7 @@ class MixDataset(Dataset):
 
             height, width = img_list[0].shape[2:]
             training_mask_boundary = utils.type_float_and_reshape(np.ones((height,width)),(1,height, width))
-            return [torch.cat(img_list, dim=0), feature_matches_list, img_to_tensor(training_mask_boundary),folder_str,idx]
+            return [torch.cat(img_list, dim=0), feature_matches_list, torch.from_numpy(training_mask_boundary),folder_str,idx]
 
         elif self.phase == 'image_loading':
             img_file_name = self.image_file_names[idx]
